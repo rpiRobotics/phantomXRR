@@ -26,24 +26,46 @@ class PhantomXInterface(object):
         self._lock=threading.RLock()
         self._serial=serial.Serial(serialPort,baudrate=38400)
 
-    def getServoPosition(self, servoNumber):
+    def getJointPosition(self, servoNumber):
+        # map from joint number to servo number used for finding
+        # joint angle by querying the correct servo
+        jointToServo = {1:'1', 2:'2', 3:'4', 4:'6', 5:'8'}
         with self._lock:
-            msg=struct.pack("cc",'r',str(servoNumber))
+            msg=struct.pack("cc",'r',jointToServo[servoNumber])
             self._serial.write(msg)
-            raw = self._serial.read(35)
-            print raw
+            raw = self._serial.readline()
+            # chop off the joint index
+            raw = raw[1:-2]
+            return raw
             
     # posArray is a list of size 5 to set joints
-    def setServoPositions(self, posArray):
+    def setJointPositions(self, posArray):
+        if -1 in posArray:
+            print "Tried to command a -1"
+            return
+            
         with self._lock:
-            commandString ="1"+str(posArray[0])+"b2"+str(posArray[1])+"b4"+str(posArray[2])+"b6"+str(posArray[3])+"b8"+str(posArray[4])
-            msg=stuct.pack("s", commandString)
-            self._serial.write(msg)
+            commandString ="1"+str(posArray[0])+"b2"+str(posArray[1])+"b4"+str(posArray[2])+"b6"+str(posArray[3])+"b8"+str(posArray[4])+"b"
+            self._serial.write(commandString)
+
+    # posArray is a list of size 5 to set joints
+    def setJointPosition(self, servoNum, pos):
+        with self._lock:
+            commandString =str(servoNum)+str(pos)+"b"
+            self._serial.write(commandString)
             
 
 def main():
     myPhantom = PhantomXInterface('/dev/ttyUSB0')
-    myPhantom.getServoPosition(2)
+    jointAngles = []
+    
+    # test code
+    # jointAngles.append(myPhantom.getJointPosition(1))
+    # jointAngles.append(myPhantom.getJointPosition(2))
+    # jointAngles.append(myPhantom.getJointPosition(3))
+    # jointAngles.append(myPhantom.getJointPosition(4))
+    # jointAngles.append(myPhantom.getJointPosition(5))
+    # myPhantom.setJointPositions(jointAngles)
     
 
 
