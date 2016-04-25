@@ -31,12 +31,12 @@ class PhantomXInterface(object):
         # joint angle by querying the correct servo
         jointToServo = {1:'1', 2:'2', 3:'4', 4:'6', 5:'8'}
         with self._lock:
-            msg=struct.pack("cc",'r',jointToServo[servoNumber])
+            msg=struct.pack("cc",'r',jointToServo[int(servoNumber)])
             self._serial.write(msg)
             raw = self._serial.readline()
             # chop off the joint index
             raw = raw[1:-2]
-            return raw
+            return int(raw)
             
     # posArray is a list of size 5 to set joints
     def setJointPositions(self, posArray):
@@ -55,11 +55,33 @@ class PhantomXInterface(object):
             self._serial.write(commandString)
             
 
-def main():
+def main():    
+
+    port = 10001       
+    t1 = RR.LocalTransport()
+    t1.StartServerAsNodeName("phantomXRR")
+    RRN.RegisterTransport(t1)
+
+    t2 = RR.TcpTransport()
+    t2.EnableNodeAnnounce()
+    t2.StartServer(port)
+    RRN.RegisterTransport(t2)
+    
+    
     myPhantom = PhantomXInterface('/dev/ttyUSB0')
-    jointAngles = []
+
+    with open('phantomXRR.robodef', 'r') as f:
+        service_def = f.read()
+    
+    RRN.RegisterServiceType(service_def)
+    RRN.RegisterService("phantomXController", "phantomXRR.PhantomXInterface", myPhantom)
+    print "Conect string: tcp://localhost:" + str(port) + "/phantomXRR/phantomXController"
+    raw_input("Press any key to end")
+
+    RRN.Shutdown()
     
     # test code
+    # jointAngles = []
     # jointAngles.append(myPhantom.getJointPosition(1))
     # jointAngles.append(myPhantom.getJointPosition(2))
     # jointAngles.append(myPhantom.getJointPosition(3))
