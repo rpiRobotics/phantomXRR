@@ -1,0 +1,11 @@
+service phantomXRR
+
+option version 0.5
+
+object PhantomXInterface
+  
+    function int16 getJointPosition(int16 jointNum)
+    function void setJointPositions(int16[] positions)
+    function void setJointPosition(int16 jointNum, int16 jointPos)
+
+end object
