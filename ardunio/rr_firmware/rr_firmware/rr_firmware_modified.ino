@@ -35,7 +35,7 @@ void go_to(){
   //Serial.println("enter go to");
   for (int i = 0; i < 8;i++) {
     if (i != 6) {
-      cur_pos = ax12GetRegister(i,36,2);
+      cur_pos = ax12GetRegister(i+1,36,2);
       if ( (cur_pos < desired_loc[i]-5) || (cur_pos > desired_loc[i]+5) ) {
         if (i == 1) {
           SetPosition(i+1,desired_loc[i]);
@@ -83,9 +83,12 @@ void setup()
   Serial.begin(9600); //start serial communications at 38400bps
   Serial.setTimeout(2);
   //Serial.println("Before MoveCenter()");
-  MoveCenter();
+  //MoveCenter();
   //Serial.println("After MoveCenter()");
   //randomSeed(analogRead(0));
+  for (int i = 0; i < 8;i++) {
+    desired_loc[i] = ax12GetRegister(i,36,2);
+  }
 }
 //============================================================================
 // user input sample
@@ -170,5 +173,6 @@ void loop()
     //Serial.println("before go to");
     go_to();
     //Serial.println("Done!!!");
+    Serial.flush();
   }
 }  
