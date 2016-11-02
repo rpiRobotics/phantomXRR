@@ -32,34 +32,46 @@ void go_to(){
 */
 
 void go_to(){
-  //Serial.println("enter go to");
+  //Serial.println("Enter go to");
   for (int i = 0; i < 8;i++) {
-    if (i != 6) {
-      cur_pos = ax12GetRegister(i+1,36,2);
+    if ((i != 2) && (i != 4) && (i != 6) ) {
+      cur_pos = GetPosition(i+1);
+      Serial.print("servo ");
+      Serial.print(i+1);
+      Serial.print("  cur pos:  ");
+      Serial.println(cur_pos);
       if ( (cur_pos < desired_loc[i]-5) || (cur_pos > desired_loc[i]+5) ) {
         if (i == 1) {
+          Serial.println("Move Servo 2");
           SetPosition(i+1,desired_loc[i]);
           SetPosition(i+2,1024-desired_loc[i]);
         }
+        /*
         else if(i == 2) {
+          
           SetPosition(i+1,desired_loc[i]);
           SetPosition(i,1024-desired_loc[i]);
         }
+        */
         else if(i == 3) {
+          Serial.println("Move Servo 4");
           SetPosition(i+1,desired_loc[i]);
           SetPosition(i+2,1024-desired_loc[i]);
         }
+        /*
         else if(i == 4) {
           SetPosition(i+1,desired_loc[i]);
           SetPosition(i,1024-desired_loc[i]);
         }
+        */
         else {
+          Serial.println("Move Servo 1/6/8");
           SetPosition(i+1,desired_loc[i]);
         }
       }
     }  
   }
-  //Serial.println("reach the end of go to");
+  //Serial.println("Reach the end of go to");
 }
 
 void MoveCenter(){
@@ -82,12 +94,13 @@ void setup()
   pinMode(0,OUTPUT);
   Serial.begin(9600); //start serial communications at 38400bps
   Serial.setTimeout(2);
+  Serial.println("SetUp Done");
   //Serial.println("Before MoveCenter()");
   //MoveCenter();
   //Serial.println("After MoveCenter()");
   //randomSeed(analogRead(0));
   for (int i = 0; i < 8;i++) {
-    desired_loc[i] = ax12GetRegister(i,36,2);
+    desired_loc[i] = ax12GetRegister(i+1,36,2);
   }
 }
 //============================================================================
@@ -105,10 +118,10 @@ void loop()
     //Serial.println("Serial.available()");
     instring = Serial.readString();
     
-    //Serial.println("before go to");
-    //go_to();
-    
-    //Serial.println("Before for loop");
+    Serial.println("Before for loop");
+    if ( (instring[0] != 'r') && (instring.length() < 5) ){
+      instring[0] = '\0';
+    } 
     for (int i = 0; i < instring.length();i++)
     {
       if (instring[i] == 'r')
@@ -129,50 +142,76 @@ void loop()
                 )
       { 
         servo_num = int(instring[i])-48;
+        Serial.print("servo_num: ");
+        Serial.println(servo_num);
+        
         String desire_pos = "";
         i++;
-        
-        while (instring[i] != 'b')
+        int count = 0;
+        while ((instring[i] != 'b') && (i < instring.length()) )
         {
+          Serial.println("not b");
           desire_pos += instring[i];
           i++;
+          count ++;
+          
+          if (count == 3) {break;}
+        }
+
+        int temp = desire_pos.toInt();
+        
+        if (count == 0) {
+          //temp = 500;    
+          temp = GetPosition(servo_num);
+        }
+        else if (count == 1) {
+          temp = temp * 100;    
+        }
+        else if (count == 2) {
+          temp = temp * 10;    
         }
         
-        int temp = desire_pos.toInt();
-        //Serial.print("desire_pos: ");
-        //Serial.println(temp);
+        Serial.print("desire_pos: ");
+        Serial.println(temp);
         
         //cur_pos = ax12GetRegister(servo_num,36,2);
         
         if (servo_num == 2 )
         {
+          Serial.println("Servo 2 change");
           desired_loc[2-1]= temp;
           desired_loc[3-1]= 1024-temp;
         }
+        /*
         else if (servo_num == 3 )
         { 
           desired_loc[3-1]= temp;
           desired_loc[2-1]= 1024-temp;
         }
+        */
         else if (servo_num == 4 )
         {
+          Serial.println("Servo 4 change");
           desired_loc[4-1]= temp;
           desired_loc[5-1]= 1024-temp;
         }
+        /*
         else if (servo_num == 5 )
         {  
           desired_loc[5-1]= temp;
           desired_loc[4-1]= 1024-temp;
         }
+        */
         else
         {
+          Serial.println("Servo 1/6/8 change");
           desired_loc[servo_num-1] = temp;
         }
       }
     }
-    //Serial.println("before go to");
+    Serial.println("before go to");
     go_to();
-    //Serial.println("Done!!!");
+    Serial.println("Done and Flush!!");
     Serial.flush();
   }
 }  
