@@ -38,7 +38,7 @@ def signal_handler(signal, frame):
 class PhantomXInterface(object):
     def __init__(self,  serialPort):
         self._lock=threading.RLock()
-        self._serial=serial.Serial(serialPort,baudrate=38400,timeout=.2)
+        self._serial=serial.Serial(serialPort,baudrate=9600,timeout=.2)
         # save joint readings so if a reading fails
         self.joint_value = [500,500,500,500,500] 
 
