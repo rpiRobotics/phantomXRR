@@ -38,33 +38,30 @@ def signal_handler(signal, frame):
 class PhantomXInterface(object):
     def __init__(self,  serialPort):
         self._lock=threading.RLock()
-        self._serial=serial.Serial(serialPort,baudrate=9600,timeout=.2)
+        self._serial=serial.Serial(serialPort,baudrate=38400,timeout=.2)
         # save joint readings so if a reading fails
         self.joint_value = [500,500,500,500,500] 
 
-    def getJointPosition(self, servoNum):
+    def getJointPositions(self):
         # map from joint number to servo number used for finding
         # joint angle by querying the correct servo
         try:
-            jointToServo = {1:'1', 2:'2', 3:'4', 4:'6', 5:'8'}
             with self._lock:
-                msg=struct.pack("cc",'r',jointToServo[int(servoNum)])
+                msg=struct.pack("<h",-9999)
                 self._serial.write(msg)
-                raw = self._serial.readline()
-                # chop off the joint index
-                raw = raw[1:-2]
-    
-                # if for some reason we got a bad value, return the last good one
-                if raw == '':
-                    return self.joint_value[servoNum-1]
-    
-                if int(raw) < 0:
-                    return self.joint_value[servoNum-1]
-                        
-    
-                jointReading = int(raw)
-                self.joint_value[servoNum-1] = jointReading
-                return jointReading
+                raw = [0,0,0,0,0]
+                
+                for i in range(5):
+                    raw[i] = self._serial.readline()
+                    # chop off the joint index
+                    raw[i] = raw[i][1:-2]
+                    # if for some reason we got a bad value, return the last good one
+                    if raw[i] == '':
+                        raw[i] = self.joint_value[i]
+                    if int(raw[i]) < 0:
+                        raw[i] = self.joint_value[i]
+                    self.joint_value[i] = int(raw[i])
+                return self.joint_value
         except:
             print "Could not read joint positions"
             return self.joint_value
@@ -77,11 +74,18 @@ class PhantomXInterface(object):
                 return
                 
             with self._lock:
-                commandString ="1"+str(posArray[0])+"b2"+str(posArray[1])+"b4"+str(posArray[2])+"b6"+str(posArray[3])+"b8"+str(posArray[4])+"b"
-                self._serial.write(commandString)
+                #commandString ="1"+str(posArray[0])+"b2"+str(posArray[1])+"b4"+str(posArray[2])+"b6"+str(posArray[3])+"b8"+str(posArray[4])+"b"
+                pos_sum = 0
+                for i in range(5):
+                    pos_sum += posArray[i]
+                    print posArray[i]
+                print pos_sum
+                data = struct.pack("<hhhhhhhh",-1,pos_sum,posArray[0],posArray[1],posArray[2],posArray[3],posArray[4],-99)
+                self._serial.write(data)
         except:
             print "Could not set joint positions"
-
+    
+    '''
     # posArray is a list of size 5 to set joints
     def setJointPosition(self, servoNum, pos):
         try:
@@ -92,7 +96,7 @@ class PhantomXInterface(object):
         except:
             print "Could not set joint position"
             
-
+    '''
 def main():    
 
     port = 10001       
@@ -106,7 +110,7 @@ def main():
     RRN.RegisterTransport(t2)
     
     
-    myPhantom = PhantomXInterface('COM11')
+    myPhantom = PhantomXInterface('/dev/ttyUSB0')
 
     with open('phantomXRR.robodef', 'r') as f:
         service_def = f.read()
