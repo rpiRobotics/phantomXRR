@@ -82,6 +82,9 @@ class PhantomXInterface(object):
                 print pos_sum
                 data = struct.pack("<hhhhhhhh",-1,pos_sum,posArray[0],posArray[1],posArray[2],posArray[3],posArray[4],-99)
                 self._serial.write(data)
+                for i in range(10):
+                   raw1 = self._serial.readline()
+                   print raw1
         except:
             print "Could not set joint positions"
     
@@ -110,8 +113,9 @@ def main():
     RRN.RegisterTransport(t2)
     
     
-    myPhantom = PhantomXInterface('/dev/ttyUSB0')
-
+    #myPhantom = PhantomXInterface('/dev/ttyUSB0')
+    myPhantom = PhantomXInterface('COM26')
+    
     with open('phantomXRR.robodef', 'r') as f:
         service_def = f.read()
     
