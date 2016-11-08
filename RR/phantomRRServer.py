@@ -87,19 +87,7 @@ class PhantomXInterface(object):
                    print raw1
         except:
             print "Could not set joint positions"
-    
-    '''
-    # posArray is a list of size 5 to set joints
-    def setJointPosition(self, servoNum, pos):
-        try:
-            with self._lock:
-                jointToServo = {1:'1', 2:'2', 3:'4', 4:'6', 5:'8'}
-                commandString = jointToServo[int(servoNum)]+str(pos)+"b"
-                self._serial.write(commandString)
-        except:
-            print "Could not set joint position"
             
-    '''
 def main():    
 
     port = 10001       
