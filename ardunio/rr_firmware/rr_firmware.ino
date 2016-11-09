@@ -1,5 +1,11 @@
 #include <ax12.h>
 
+#define NO_COMMAND 0
+#define READ_COMMAND -9999
+#define SET_COMMAND -1
+
+int state = 1 // state starts in NO_COMMAND
+
 //---------------------------------------------------------------
 union Data {
    char bufc[16];
@@ -63,13 +69,34 @@ void setup(){
   Serial.begin(38400); //start serial communications at 38400bps
   Serial.setTimeout(2); 
   //Serial.println("SetUp Done");
+  
+  boolean IN_NO_COMMAND_STATE
 }
 
 //---------------------------------------------------------------
 void loop(){
-  
   //----------------
   //SetPositions
+  switch(state):
+    case NO_COMMAND:  
+      if(Serial.available() > 0){
+        //READ FIRST BYTE
+        state = Serial.read() // CONVERT ME CAUSE IM READING ONLY ONE BYTE WHEN I SHOULD BE READING 2     
+      }
+      break;
+      
+    case READ_COMMAND:
+      // DO READ STUFF  
+      break;
+      
+    case SET_COMMAND:
+      // DO SET STUFF 
+       
+    default:
+      state = NO_COMMAND;
+      // WE NEED TO FLUSH
+      break;
+  
   if (Serial.available() == 16) {
     union Data data;
     //Serial.println("have 16 bytes");
@@ -121,7 +148,7 @@ void loop(){
   //GetPositions
   else if (Serial.available() == 2) {
     union Data data;
-    
+    //Serial.println("have 2 bytes");
     //read
     for (int i=0; i<2; ++i) {
       data.bufc[i] = Serial.read();
@@ -135,7 +162,7 @@ void loop(){
     }
     
     if (correctmsg) {
-     
+      //Serial.println("current_loc init");
       current_loc[0] = GetPosition(1);
       current_loc[1] = GetPosition(2);
       current_loc[2] = GetPosition(4);
@@ -151,10 +178,12 @@ void loop(){
   }
   //----------------
   //error msg
-  else {
+  else if( Serial.available() > 16) {
     //Serial.println("else");
-    while (Serial.available() > 0) {
-      //Serial.println("else");
+    int num_bytes_to_read = Serial.available();
+    while (num_bytes_to_read > 0) {
+      num_bytes_to_read-=1;
+      //Serial.println("read");
       Serial.read();
     }
   }

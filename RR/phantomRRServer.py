@@ -78,13 +78,13 @@ class PhantomXInterface(object):
                 pos_sum = 0
                 for i in range(5):
                     pos_sum += posArray[i]
-                    print posArray[i]
-                print pos_sum
+                    #print posArray[i]
+                #print pos_sum
                 data = struct.pack("<hhhhhhhh",-1,pos_sum,posArray[0],posArray[1],posArray[2],posArray[3],posArray[4],-99)
                 self._serial.write(data)
-                for i in range(10):
-                   raw1 = self._serial.readline()
-                   print raw1
+                #for i in range(10):
+                   #raw1 = self._serial.readline()
+                   #print raw1
         except:
             print "Could not set joint positions"
             
@@ -102,7 +102,7 @@ def main():
     
     
     #myPhantom = PhantomXInterface('/dev/ttyUSB0')
-    myPhantom = PhantomXInterface('COM26')
+    myPhantom = PhantomXInterface('COM11')
     
     with open('phantomXRR.robodef', 'r') as f:
         service_def = f.read()
