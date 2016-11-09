@@ -4,8 +4,6 @@
 #define READ_COMMAND -9999
 #define SET_COMMAND -1
 
-int state = 1 // state starts in NO_COMMAND
-
 //---------------------------------------------------------------
 union Data {
    char bufc[16];
@@ -14,6 +12,9 @@ union Data {
 
 uint16_t desired_loc[]= {512, 512, 512, 512, 512};
 uint16_t current_loc[]= {512, 512, 512, 512, 512};
+
+union Data data
+data.bufi[0] = 1; // state starts in NO_COMMAND
 
 int cur_pos = 0;
 boolean correctmsg = true;
@@ -70,33 +71,98 @@ void setup(){
   Serial.setTimeout(2); 
   //Serial.println("SetUp Done");
   
-  boolean IN_NO_COMMAND_STATE
+  boolean IN_NO_COMMAND_STATE;
 }
 
 //---------------------------------------------------------------
 void loop(){
-  //----------------
-  //SetPositions
-  switch(state):
-    case NO_COMMAND:  
+  
+  switch(data.bufi[0]){
+    //----------------
+    //Do nothing but read
+    case NO_COMMAND:
       if(Serial.available() > 0){
-        //READ FIRST BYTE
-        state = Serial.read() // CONVERT ME CAUSE IM READING ONLY ONE BYTE WHEN I SHOULD BE READING 2     
+        //READ FIRST TWO BYTES
+        Serial.readBytes(data.bufc, 3);
       }
       break;
-      
+    //----------------
+    //GetPositions
     case READ_COMMAND:
       // DO READ STUFF  
-      break;
+      if (correctmsg) {
+        //Serial.println("current_loc init");
+        current_loc[0] = GetPosition(1);
+        current_loc[1] = GetPosition(2);
+        current_loc[2] = GetPosition(4);
+        current_loc[3] = GetPosition(6);
+        current_loc[4] = GetPosition(8);
       
+        for (int i=0; i<5; ++i) {
+          Serial.print(i+1);
+          Serial.println(current_loc[i]);
+        }
+      }
+      correctmsg = true;      
+      break;
+    //----------------
+    //SetPositions  
     case SET_COMMAND:
-      // DO SET STUFF 
-       
+      //DO SET STUFF
+      //read
+      union Data data;
+      //Serial.println("have 16 bytes");
+      //Serial.println(Serial.available());
+      //read
+      int len = 0;
+      len = Serial.readBytes(data.bufc, 14);
+      if (len < 15) {continue;}
+      //Serial.println("after read");
+      //Serial.println(len);
+      //Serial.println(data.bufi[0]);
+      //Serial.println("start checked"); 
+      //check end
+      if (data.bufi[7] != -99) {
+        correctmsg = false;
+        Serial.println("-1");
+      }
+      //Serial.println("end checked");
+      //calculate sum
+      int sum = 0;
+      for (int i=2; i<7; ++i) {
+        sum = sum + data.bufi[i];
+      }
+      //Serial.println("sum calculated");
+      //check sum
+      if (data.bufi[1] != sum) {
+        correctmsg = false;
+        Serial.println("-1");
+      }
+      //Serial.println("sum checked");
+      if (correctmsg) {
+        //Serial.println("before for loop");
+        for (int i=0; i<5; i++) {
+          desired_loc[i] = data.bufi[i+2];
+          //Serial.println(desired_loc[i]);
+        }
+        //Serial.println("before goto");
+        go_to();
+      }
+      //Serial.println("false");
+      correctmsg = true;
+      break;
+    //----------------
+    //Default 
     default:
-      state = NO_COMMAND;
+      data.bufi[0] = NO_COMMAND;
       // WE NEED TO FLUSH
       break;
-  
+  }  
+}  
+  //------------------------------------------------------------     
+  /*
+  //----------------
+  //SetPositions
   if (Serial.available() == 16) {
     union Data data;
     //Serial.println("have 16 bytes");
@@ -189,3 +255,4 @@ void loop(){
   }
   
 } // loop
+*/
