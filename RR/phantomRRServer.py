@@ -47,7 +47,9 @@ class PhantomXInterface(object):
         # joint angle by querying the correct servo
         try:
             with self._lock:
+
                 msg=struct.pack("<c",'r')
+
                 self._serial.write(msg)
                 raw = [0,0,0,0,0]
                 
