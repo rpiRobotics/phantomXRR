@@ -137,13 +137,6 @@ void loop(){
     default:{
        if(Serial.available() > 0){
         state = Serial.read();
-        if(state != READ_COMMAND && state != SET_COMMAND){
-          //FLUSH EVERYTHING IN BUFFER
-          int amount_to_read = Serial.available();
-          for(int i=0; i < amount_to_read; i++){
-            Serial.read(); 
-          }
-        }
       }      
     }  
   }
