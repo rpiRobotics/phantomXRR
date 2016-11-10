@@ -9,15 +9,10 @@ print "Serial set"
 #raw = _serial.readline()
 #print "after readline"
 
-#data = struct.pack("<hhhhhhhh",-1,2300,500,300,500,500,500,-99)
-data = struct.pack("<h",-9999)
-#print "after struct"
-#_serial.write(data)
-#print "after write"
-#time.sleep(2)
+data = struct.pack("<chhhhhh",'s',2300,500,300,500,500,500)
+#data = struct.pack("<c",'r')
 
 for i in range(20):
         _serial.write(data)
         raw = _serial.readline()
-        print "Getting new message"
         print raw

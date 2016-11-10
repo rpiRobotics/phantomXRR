@@ -5,12 +5,11 @@ robot.setJointPositions(base_pose);
 pause(1);
 
 disp 'Going into twitch loop'
-a = -30; b = 30;
+pi_inc = pi / 10;
 for i=1:1:100
-    delta_r = int16(((b-a).*rand(5,1) + [a; a; a; a; a]));
-    new_pose = int16(delta_r + base_pose);
+    delta_r = 30*int16( sin( ones(1,5) * pi_inc*i) );
+    new_pose = int16(delta_r' + base_pose);
     robot.setJointPositions(new_pose);
-    pause(.1);
     robot.getJointPositions()
-    pause(.2);
+    pause(.5);
 end

@@ -101,20 +101,20 @@ void loop(){
       //DO SET STUFF
       
       // CHECK TO MAKE SURE WE HAVE THE PROPER NUMBER OF BYTES
-      delay(10); // LET THINGS ACCUMULAT
+      delay(10); // LET THINGS ACCUMULATE
       if(Serial.available() < 12){
         state = 0;
         break;  
       }
-     
-      Serial.readBytes(data.bufc, 12);
+   
+      Serial.readBytes(data.bufc, 13);
 
       //calculate sum
       int sum = 0;
+      
       for (int i=1; i<6; ++i) {
         sum = sum + data.bufi[i];
       }
-      //Serial.println("sum calculated");
       //check sum
       if (data.bufi[0] == sum) {
         correctmsg = true;
@@ -131,6 +131,7 @@ void loop(){
       state = 0; // GO BACK TO DEFAULT STATE
       break;
     }
+    
     //--------------------------------------------------------------------------------------------------------------
     //Default 
     default:{

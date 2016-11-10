@@ -47,7 +47,7 @@ class PhantomXInterface(object):
         # joint angle by querying the correct servo
         try:
             with self._lock:
-                msg=struct.pack("<h",-9999)
+                msg=struct.pack("<c",'r')
                 self._serial.write(msg)
                 raw = [0,0,0,0,0]
                 
@@ -80,7 +80,7 @@ class PhantomXInterface(object):
                     pos_sum += posArray[i]
                     #print posArray[i]
                 #print pos_sum
-                data = struct.pack("<hhhhhhhh",-1,pos_sum,posArray[0],posArray[1],posArray[2],posArray[3],posArray[4],-99)
+                data = struct.pack("<chhhhhh",'s',pos_sum,posArray[0],posArray[1],posArray[2],posArray[3],posArray[4])
                 self._serial.write(data)
                 #for i in range(10):
                    #raw1 = self._serial.readline()
