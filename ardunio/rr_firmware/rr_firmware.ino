@@ -67,6 +67,7 @@ void go_to(){
 void setup(){
   Serial.begin(38400); //start serial communications at 38400bps
   Serial.setTimeout(2); 
+  //Serial.println("setup done");
 }
 
 //---------------------------------------------------------------
@@ -74,7 +75,7 @@ void loop(){
   delay(1);
   union Data data;
   switch(state){
-    //--------------------------------------------------------------------------------------------------------------
+    //-----------------------------------------------------------------
     
     //GetPositions
     case READ_COMMAND:
@@ -95,20 +96,32 @@ void loop(){
       break;
       
       
-    //--------------------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------
     //SetPositions  
     case SET_COMMAND:{
+      //Serial.println("set state");
       //DO SET STUFF
       
       // CHECK TO MAKE SURE WE HAVE THE PROPER NUMBER OF BYTES
       delay(10); // LET THINGS ACCUMULATE
       if(Serial.available() < 12){
+        //Serial.println("serial < 12");
         state = 0;
         break;  
       }
-   
-      Serial.readBytes(data.bufc, 13);
-
+      
+      //Serial.print("Serial: ");
+      //Serial.println(Serial.available());
+      int bytesread = 0;
+      
+      for (int i=0;i<12;++i) {
+        data.bufc[i] = Serial.read();
+      }
+      
+      //bytesread = Serial.readBytes(data.bufc, 13);
+      //Serial.print("bytesread: ");
+      //Serial.println(bytesread);
+      //Serial.println();
       //calculate sum
       int sum = 0;
       
@@ -118,12 +131,17 @@ void loop(){
       //check sum
       if (data.bufi[0] == sum) {
         correctmsg = true;
+        //Serial.println("sum checked");
       }
-
+      
+      //Serial.print("correctmsg: ");
+      //Serial.println(correctmsg);
+      
       if (correctmsg) {
         for (int i=1; i<6; i++) {
           desired_loc[i-1] = data.bufi[i];
         }
+        //Serial.println("before go_to");
         go_to();
       }
       
@@ -132,10 +150,12 @@ void loop(){
       break;
     }
     
-    //--------------------------------------------------------------------------------------------------------------
+    //--------------------------------------------------------------
     //Default 
     default:{
        if(Serial.available() > 0){
+        //Serial.print("Serial: ");
+        //Serial.println(Serial.available());
         state = Serial.read();
       }      
     }  
