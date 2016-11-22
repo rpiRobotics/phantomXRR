@@ -80,7 +80,7 @@ void loop(){
     //GetPositions
     case READ_COMMAND:
       // DO READ STUFF  
-      //Serial.println("current_loc init");
+      //Serial.println("Read State");
       current_loc[0] = GetPosition(1);
       current_loc[1] = GetPosition(2);
       current_loc[2] = GetPosition(4);
@@ -99,7 +99,7 @@ void loop(){
     //-------------------------------------------------------------
     //SetPositions  
     case SET_COMMAND:{
-      //Serial.println("set state");
+      //Serial.println("Set State");
       //DO SET STUFF
       
       // CHECK TO MAKE SURE WE HAVE THE PROPER NUMBER OF BYTES
@@ -157,6 +157,8 @@ void loop(){
         //Serial.print("Serial: ");
         //Serial.println(Serial.available());
         state = Serial.read();
+        //Serial.print("State: ");
+        //Serial.println(state);
       }      
     }  
   }
